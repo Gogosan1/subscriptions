@@ -1,0 +1,3 @@
+CREATE TABLE IF NOT EXISTS sub.users (
+   login VARCHAR(50) PRIMARY KEY
+);

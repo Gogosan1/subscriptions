@@ -1,0 +1,43 @@
+services:
+  postgres-subscriptions:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-subscriptions}
+      POSTGRES_USER: ${POSTGRES_USER:-subscriptions}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - postgres-data-subscriptions:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - internal-bridge
+
+  subscriptions:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: ${DB_HOST:-postgres-subscriptions}
+      DB_PORT: 5432
+      DB_NAME: ${POSTGRES_DB:-subscriptions}
+      DB_USER: ${POSTGRES_USER:-subscriptions}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+      EUREKA_ENDPOINT: ${EUREKA_ENDPOINT:-http://discovery-service:8761/eureka}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_INTERNAL_BOOTSTRAP_SERVERS:-kafka-0:9091}
+
+    depends_on:
+      postgres-subscriptions:
+        condition: service_healthy
+    networks:
+      - internal-bridge
+
+volumes:
+  postgres-data-subscriptions:
+
+networks:
+  internal-bridge:
+    name: microservices-training-net
+    external: true
