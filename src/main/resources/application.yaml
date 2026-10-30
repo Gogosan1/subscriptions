@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: "subscriptions"
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:subscriptions}
+    username: ${DB_USER:subscriptions}
+    password: ${DB_PASSWORD:subscriptions}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+    properties:
+      hibernate:
+        default_schema: sub
+        show-sql: true
+        format_sql: true
+
+    open-in-view: false
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yml
+    default-schema: sub
+    liquibase-schema: public
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
+    subscription-invalidation-topic: ${KAFKA_SUBSCRIPTION_INVALIDATION_TOPIC:subscription-invalidation}
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+      acks: all
+      retries: 5
+      properties:
+        enable.idempotence: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_ENDPOINT:http://localhost:8761/eureka}
+
+scheduling:
+  cron-expression: "0 0 3 * * *"
