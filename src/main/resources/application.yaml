@@ -25,7 +25,6 @@ spring:
     change-log: classpath:db/changelog/db.changelog-master.yml
     default-schema: sub
     liquibase-schema: public
-    drop-first: true
 
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:29092}
